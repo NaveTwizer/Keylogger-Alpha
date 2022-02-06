@@ -46,8 +46,8 @@ def send_mail(d : int = 1):
     # Not limiting it to yesterday's logs ONLY.
 
     year, month, day, hour, minutes, secs = get_time()
-    EMAIL = "NavePython@gmail.com"
-    PASSWORD = "123456789Python"
+    EMAIL = "Put your email here"
+    PASSWORD = "Put your password here"
     if (d > day):
         return
 
