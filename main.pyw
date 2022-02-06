@@ -32,7 +32,7 @@ def encrypt_file(path : str):
     encContent = fernet.encrypt(content)
     with open(path, "r+") as f:
         f.truncate(0)
-        f.write(content.decode())
+        f.write(encContent.decode())
         f.write("\n")
         f.write(f"Key: {str(key)}")
 
